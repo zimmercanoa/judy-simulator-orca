@@ -1,6 +1,9 @@
 name: CI (PHP lint + Flutter)
 
 on:
+  push:
+    branches-ignore:
+      - master
   pull_request:
   workflow_dispatch:
 
