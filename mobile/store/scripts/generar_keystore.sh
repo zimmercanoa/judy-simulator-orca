@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # ============================================================
-#  generar_keystore.sh — Crea la clave de SUBIDA para Google Play
+#  generar_keystore.sh — Crea la clave de firma de release (definitiva: respáldala)
 #  y android/key.properties (macOS/Linux/Git Bash).
 #
-#  Uso (desde mobile/):  ./store/scripts/generar_keystore.sh ~/claves/judy-upload.jks
+#  Uso (desde mobile/):  ./store/scripts/generar_keystore.sh ~/judy-claves/judy-release.jks
 #  El .jks debe quedar FUERA del repositorio. Requiere keytool (JDK 17).
 # ============================================================
 set -euo pipefail
 
-destino="${1:?Indica la ruta del .jks, p. ej. ~/claves/judy-upload.jks}"
-alias_clave="${2:-upload}"
+destino="${1:?Indica la ruta del .jks, p. ej. ~/judy-claves/judy-release.jks}"
+alias_clave="${2:-judy-release}"
 
 command -v keytool >/dev/null || { echo "No se encontró keytool (instala un JDK 17 o Android Studio)." >&2; exit 1; }
 repo="$(git rev-parse --show-toplevel 2>/dev/null || true)"

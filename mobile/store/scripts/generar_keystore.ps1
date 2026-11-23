@@ -1,19 +1,22 @@
-# ============================================================
-#  generar_keystore.ps1 — Crea la clave de SUBIDA (upload key)
-#  para Google Play y el archivo android/key.properties.
+﻿# ============================================================
+#  generar_keystore.ps1 — Crea la clave de firma de release y el
+#  archivo android/key.properties.
 #
 #  Uso (PowerShell, desde la carpeta mobile/):
-#    .\store\scripts\generar_keystore.ps1 -Destino "C:\claves\judy-upload.jks"
+#    .\store\scripts\generar_keystore.ps1 -Destino "$env:USERPROFILE\judy-claves\judy-release.jks"
 #
 #  - El .jks se crea FUERA del repositorio (no lo subas nunca).
-#  - Con Play App Signing, Google guarda la clave de firma final; esta
-#    clave solo sirve para subir AAB y se puede restablecer si se pierde.
+#  - Distribución directa de APK: esta es la clave DEFINITIVA. Si se
+#    pierde, ninguna versión nueva se podrá instalar encima de la anterior.
+#    Respáldala (gestor de contraseñas + copia cifrada).
+#  - Si algún día se usa Google Play, con Play App Signing esta clave
+#    pasaría a ser solo la clave de subida.
 #  - Requiere keytool (incluido en el JDK de Android Studio:
 #    "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe").
 # ============================================================
 param(
     [Parameter(Mandatory = $true)][string]$Destino,
-    [string]$Alias = "upload"
+    [string]$Alias = "judy-release"
 )
 
 $ErrorActionPreference = "Stop"

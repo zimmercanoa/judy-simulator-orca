@@ -55,6 +55,13 @@ Aunque no se pase `DEMO_MODE`, la pantalla de login tiene los botones
 **Empleado / Gerencia** y el interruptor *Usar datos simulados*.
 Usuarios demo: `EMP-001` o `GER-001`, contraseña `demo1234`.
 
+## Distribución
+
+La APK se descarga desde `https://judysimulator.wuaze.com/descargar.php` y se
+aloja en GitHub Releases (tag `mobile-vX.Y.Z`). Pasos para compilar, firmar y
+publicar: [store/DISTRIBUCION_APK.md](store/DISTRIBUCION_APK.md). Medidas de
+seguridad y opciones: [store/SEGURIDAD.md](store/SEGURIDAD.md).
+
 ## Seguridad
 
 - El token Bearer se guarda en `flutter_secure_storage` (Keychain en iOS,
