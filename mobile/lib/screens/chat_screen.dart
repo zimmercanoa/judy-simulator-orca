@@ -141,6 +141,15 @@ class _ChatScreenState extends State<ChatScreen>
           },
         ),
       ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Text(
+          'Tus preguntas se envían a Google Gemini para generar la respuesta. '
+          'No escribas datos personales.',
+          style: Theme.of(context).textTheme.bodySmall,
+          textAlign: TextAlign.center,
+        ),
+      ),
       if (_mensajes.length == 1)
         SizedBox(
           height: 44,

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../config.dart';
 import '../models/usuario.dart';
 import '../services/judy_api.dart';
+import '../services/pantalla_segura.dart';
 import '../state/session.dart';
 import '../widgets/common.dart';
 import 'contacto_screen.dart';
@@ -17,7 +18,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with PantallaSeguraMixin<LoginScreen> {
   final _form = GlobalKey<FormState>();
   final _matricula = TextEditingController();
   final _password = TextEditingController();
@@ -209,8 +211,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           icon: const Icon(Icons.mail_outline),
                           label: const Text('Contacto'),
                         ),
+                        TextButton.icon(
+                          onPressed: () =>
+                              abrirUrl(context, AppConfig.privacidadUrl),
+                          icon: const Icon(Icons.privacy_tip_outlined),
+                          label: const Text('Privacidad'),
+                        ),
                       ],
                     ),
+                    Text('Versión ${AppConfig.appVersion}',
+                        textAlign: TextAlign.center,
+                        style: tema.textTheme.bodySmall),
                   ],
                 ),
               ),

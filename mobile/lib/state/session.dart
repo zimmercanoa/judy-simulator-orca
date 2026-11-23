@@ -93,6 +93,16 @@ class SessionController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Elimina la cuenta en el servidor y borra la sesión local.
+  Future<void> eliminarCuenta(String password) async {
+    await _api.eliminarCuenta(password);
+    await _store.clear();
+    _api.token = null;
+    _usuario = null;
+    if (!AppConfig.forceDemo && _api.esDemo) _api = _realFactory();
+    notifyListeners();
+  }
+
   /// Llamar cuando la API responde 401 en cualquier pantalla.
   Future<void> sesionExpirada() async {
     await _store.clear();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/avance.dart';
 import '../services/judy_api.dart';
@@ -24,6 +25,14 @@ void mostrarSnack(BuildContext context, String texto, {bool error = false}) {
       content: Text(texto),
       backgroundColor: error ? Theme.of(context).colorScheme.error : null,
     ));
+}
+
+/// Abre una URL https en el navegador del sistema.
+Future<void> abrirUrl(BuildContext context, String url) async {
+  final ok = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  if (!ok && context.mounted) {
+    mostrarSnack(context, 'No se pudo abrir el navegador.', error: true);
+  }
 }
 
 /// Logo del sitio según el brillo del tema.

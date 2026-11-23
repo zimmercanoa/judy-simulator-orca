@@ -25,6 +25,20 @@ class LoginResult {
   final Usuario usuario;
 }
 
+/// Última versión publicada de la app (`api/version.php`).
+class VersionInfo {
+  const VersionInfo({
+    required this.version,
+    required this.versionCode,
+    required this.descargaUrl,
+    this.notas = '',
+  });
+  final String version;
+  final int versionCode;
+  final String descargaUrl;
+  final String notas;
+}
+
 /// Contrato común para la API real y el modo demo.
 abstract class JudyApi {
   /// Token Bearer actual (null si no hay sesión).
@@ -64,6 +78,12 @@ abstract class JudyApi {
   });
 
   Future<String> chat(String mensaje);
+
+  /// Elimina definitivamente la cuenta actual (requiere contraseña).
+  Future<void> eliminarCuenta(String password);
+
+  /// Última versión publicada, o `null` si no se pudo consultar.
+  Future<VersionInfo?> ultimaVersion();
 
   Future<String> contacto({
     required String nombre,

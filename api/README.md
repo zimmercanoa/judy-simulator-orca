@@ -25,7 +25,12 @@ preparadas y la conexión `$conexion` de `config.php` (no se crea otra).
 - **Errores:** siempre JSON; las excepciones no controladas se registran con
   `error_log` y se devuelve un `500` genérico sin detalles internos.
 - **Chat:** `_gemini.php` replica el *system prompt* de confidencialidad y el
-  filtro de salida de `chat_api.php`. Si cambias uno, actualiza el otro.
+  filtro de salida de `asistente_api.php`. Si cambias uno, actualiza el otro.
+- **Nombres:** ningún endpoint contiene «chat»: InfinityFree responde 403 a cualquier
+  URL con esa palabra (por eso el asistente es `asistente.php`).
+- **Eliminar cuenta:** `eliminar_cuenta.php` pide la contraseña actual; `ON DELETE CASCADE`
+  borra avances y tokens. No permite borrar la última cuenta de gerencia.
+- **Versión:** `version.php` lee `descargas/app.json` (lo usa la app para avisar de actualizaciones).
 - **Rechazar usuario:** marca `estatus = 'rechazado'` (no puede iniciar sesión).
 - Los archivos con prefijo `_` están bloqueados por `.htaccess`, que además
   reenvía la cabecera `Authorization` cuando PHP corre como CGI/FPM.

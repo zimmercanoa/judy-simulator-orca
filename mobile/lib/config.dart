@@ -23,6 +23,16 @@ class AppConfig {
     defaultValue: 'https://judysimulator.wuaze.com',
   );
 
+  /// Versión instalada (igual a `version:` de pubspec.yaml).
+  static const String appVersion = '0.1.0';
+  static const int appVersionCode = 1;
+
+  /// Página pública de descarga de la APK.
+  static const String descargaUrl = '$webUrl/descargar.php';
+
+  /// Aviso de privacidad público.
+  static const String privacidadUrl = '$webUrl/privacidad.php';
+
   /// Tiempo máximo de espera de una petición HTTP.
   static const Duration timeout = Duration(seconds: 20);
 }

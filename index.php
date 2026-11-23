@@ -31,7 +31,14 @@ session_start();
                     Comenzar Ahora
                 </a>
             <?php endif; ?>
+            <a href="descargar.php" class="btn-registro"
+               style="font-size:20px; padding:15px 30px; margin-left:10px; background-color:var(--azul-acento);">
+                📱 Descargar app Android
+            </a>
         </div>
+        <?php if (isset($_GET['cuenta']) && $_GET['cuenta'] === 'eliminada'): ?>
+            <p style="margin-top:20px; color:#22c55e; font-weight:bold;">Tu cuenta y tus datos fueron eliminados.</p>
+        <?php endif; ?>
     </div>
 </section>
 

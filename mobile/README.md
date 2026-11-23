@@ -80,13 +80,27 @@ location.href="https://judysimulator.wuaze.com/?i=1";</script>
 <noscript>This site requires Javascript to work…</noscript></body></html>
 ```
 
-Lo mismo ocurre con `POST /api/login.php` y `POST /chat_api.php`: en lugar del
+Lo mismo ocurre con `POST /api/login.php` y `GET /api/version.php`: en lugar del
 JSON, el plan gratuito de InfinityFree devuelve un **desafío anti-bots en
 JavaScript** (`aes.js` + cookie `__test`). Un navegador lo resuelve solo; un
 cliente HTTP nativo (Dart `http`, Retrofit, URLSession, curl…) no ejecuta
 JavaScript, así que **la API no es utilizable desde la app mientras esté en
 InfinityFree gratuito**. InfinityFree lo documenta como limitación del plan
 gratuito: solo admite tráfico de navegadores.
+
+**¿Ayuda cambiar el User-Agent?** No. Prueba del 2026-11-23 contra
+`/api/version.php`:
+
+| User-Agent | Resultado |
+| --- | --- |
+| `curl/8.0` (por defecto de curl) | conexión cortada (código `000`) y cuerpo con el desafío |
+| `Dart/3.13 (dart:io)` (el de la app) | `200 text/html` con el desafío `aes.js` / `__test` |
+| Chrome Android (`Mozilla/5.0 … Mobile Safari/537.36`) | `200 text/html` con el mismo desafío |
+
+Un User-Agent de navegador solo evita el corte del UA de curl, pero **el desafío
+de la cookie `__test` aparece igual**, así que la app no finge ser un navegador.
+Además InfinityFree responde **403 a cualquier URL que contenga «chat»**, por eso
+el endpoint del asistente es `api/asistente.php`.
 
 La app lo detecta (`HttpJudyApi.esDesafioAntiBot`) y muestra un mensaje claro
 con el botón **Usar modo demo**, en lugar de fallar con un error de JSON.
@@ -129,7 +143,9 @@ Autenticación: `Authorization: Bearer <token>` (respaldo: cabecera `X-Api-Token
 | GET | `usuarios.php` | gerencia | solicitudes pendientes |
 | POST | `usuarios.php` | gerencia | `{id_usuario, accion: aprobar\|rechazar, rol}` |
 | POST | `registro.php` | público | `{matricula, nombre, correo, telefono, password}` |
-| POST | `chat.php` | autenticado | `{mensaje}` → `{respuesta}` |
+| POST | `asistente.php` | autenticado | `{mensaje}` → `{respuesta}` |
+| POST | `eliminar_cuenta.php` | autenticado | `{password}` — borra la cuenta y sus datos |
+| GET | `version.php` | público | última versión publicada de la APK |
 | POST | `contacto.php` | público | `{nombre, correo, mensaje}` |
 
 Límites (por IP o usuario): login 10/15 min, registro 5/h, contacto 1/min y

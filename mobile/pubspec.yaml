@@ -2,7 +2,9 @@ name: judy_simulator
 description: "JuDy Simulator - capacitación VR en seguridad fotovoltaica (NOM-009 / NOM-029)"
 publish_to: 'none'
 
-version: 1.0.0+1
+# Mantener sincronizado con AppConfig.appVersion / appVersionCode
+# y con el tag git mobile-vX.Y.Z (lo verifica test/version_test.dart).
+version: 0.1.0+1
 
 environment:
   sdk: ^3.8.0

@@ -1,8 +1,9 @@
 <?php
 // ============================================================
-//  api/chat.php — POST {mensaje} → {respuesta}
+//  api/asistente.php — POST {mensaje} → {respuesta}
+//  (No usar 'chat' en nombres: InfinityFree responde 403 a esas URLs.)
 //  Proxy al asistente Gemini con las mismas restricciones de
-//  confidencialidad que chat_api.php. Requiere token Bearer
+//  confidencialidad que asistente_api.php (antes chat_api.php). Requiere token Bearer
 //  (equivale a la sesión web) y limita 30 mensajes/hora por usuario.
 //  csrf-exception: API sin cookies; autenticación por token Bearer.
 // ============================================================

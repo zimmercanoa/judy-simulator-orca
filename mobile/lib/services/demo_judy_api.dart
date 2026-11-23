@@ -280,6 +280,21 @@ class DemoJudyApi implements JudyApi {
   }
 
   @override
+  Future<void> eliminarCuenta(String password) async {
+    await _esperar();
+    final u = _actual();
+    if (password != passwordDemo) {
+      throw const ApiException('La contraseña no es correcta.', status: 401);
+    }
+    _usuarios.remove(u.matricula);
+    _avances.removeWhere((a) => a.idUsuario == u.id);
+    token = null;
+  }
+
+  @override
+  Future<VersionInfo?> ultimaVersion() async => null;
+
+  @override
   Future<String> contacto({
     required String nombre,
     required String correo,

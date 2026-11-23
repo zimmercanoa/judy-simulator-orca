@@ -210,8 +210,32 @@ class HttpJudyApi implements JudyApi {
 
   @override
   Future<String> chat(String mensaje) async {
-    final data = await _post('chat.php', {'mensaje': mensaje});
+    final data = await _post('asistente.php', {'mensaje': mensaje});
     return (data['respuesta'] ?? '').toString();
+  }
+
+  @override
+  Future<void> eliminarCuenta(String password) async {
+    await _post('eliminar_cuenta.php', {'password': password});
+    token = null;
+  }
+
+  @override
+  Future<VersionInfo?> ultimaVersion() async {
+    try {
+      final data = await _get('version.php');
+      if (data['publicada'] != true) return null;
+      return VersionInfo(
+        version: (data['version'] ?? '').toString(),
+        versionCode: int.tryParse('${data['version_code']}') ?? 0,
+        descargaUrl:
+            (data['descarga_url'] ?? AppConfig.descargaUrl).toString(),
+        notas: (data['notas'] ?? '').toString(),
+      );
+    } on ApiException {
+      // Sin red o servidor bloqueado: no se avisa de actualizaciones.
+      return null;
+    }
   }
 
   @override

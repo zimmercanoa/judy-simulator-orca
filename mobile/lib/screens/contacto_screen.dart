@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../config.dart';
 import '../state/session.dart';
@@ -50,13 +49,7 @@ class _ContactoScreenState extends State<ContactoScreen> {
     }
   }
 
-  Future<void> _abrirWeb() async {
-    final ok = await launchUrl(Uri.parse(AppConfig.webUrl),
-        mode: LaunchMode.externalApplication);
-    if (!ok && mounted) {
-      mostrarSnack(context, 'No se pudo abrir el navegador.', error: true);
-    }
-  }
+  Future<void> _abrirWeb() => abrirUrl(context, AppConfig.webUrl);
 
   @override
   Widget build(BuildContext context) {

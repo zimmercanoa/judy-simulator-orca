@@ -1,7 +1,7 @@
 <?php
 // ============================================================
 //  api/_gemini.php — Cliente Gemini para la API móvil.
-//  Replica EXACTAMENTE las restricciones de chat_api.php:
+//  Replica EXACTAMENTE las restricciones de asistente_api.php:
 //  system prompt de confidencialidad + filtro de salida de datos
 //  personales. Si cambias uno, actualiza el otro.
 // ============================================================

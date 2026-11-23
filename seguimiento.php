@@ -123,6 +123,11 @@ $rol_usuario    = $_SESSION['rol'] ?? 'sin_rol';
             </p>
         </div>
     <?php endif; ?>
+
+    <p style="margin-top:40px; font-size:14px; color:var(--letras-secundarias);">
+        <a href="privacidad.php">Aviso de privacidad</a> ·
+        <a href="eliminar_cuenta.php" style="color:#dc2626;">Eliminar mi cuenta</a>
+    </p>
 </div>
 
 </body>

@@ -110,6 +110,31 @@ void main() {
       );
     });
 
+    test('ultimaVersion: publicada => info; error o anti-bot => null', () async {
+      final ok = HttpJudyApi(
+        baseUrl: 'https://api.test/api',
+        client: MockClient((req) async {
+          expect(req.url.path, endsWith('version.php'));
+          return _json({
+            'ok': true,
+            'publicada': true,
+            'version': '0.2.0',
+            'version_code': 2,
+            'descarga_url': 'https://sitio.test/descargar.php'
+          });
+        }),
+      );
+      final info = await ok.ultimaVersion();
+      expect(info?.versionCode, 2);
+      expect(info?.descargaUrl, 'https://sitio.test/descargar.php');
+
+      final bloqueado = HttpJudyApi(
+        baseUrl: 'https://api.test/api',
+        client: MockClient((_) async => http.Response(_desafioInfinityFree, 200)),
+      );
+      expect(await bloqueado.ultimaVersion(), isNull);
+    });
+
     test('actualizarAvance envía el estado exacto de la BD', () async {
       late Map<String, dynamic> enviado;
       final api = HttpJudyApi(
@@ -162,6 +187,17 @@ void main() {
       expect(editado.porcentaje, 100);
       expect((await api.avances(idUsuario: 2)).firstWhere((a) => a.id == 2).estado,
           EstadoAvance.completado);
+    });
+
+    test('eliminarCuenta exige contraseña y borra al usuario', () async {
+      final api = DemoJudyApi(latencia: Duration.zero);
+      await api.login('EMP-001', DemoJudyApi.passwordDemo);
+      expect(() => api.eliminarCuenta('mal'),
+          throwsA(isA<ApiException>().having((e) => e.status, 'status', 401)));
+      await api.eliminarCuenta(DemoJudyApi.passwordDemo);
+      expect(api.token, isNull);
+      expect(() => api.login('EMP-001', DemoJudyApi.passwordDemo),
+          throwsA(isA<ApiException>()));
     });
 
     test('credenciales incorrectas y chat sin datos personales', () async {

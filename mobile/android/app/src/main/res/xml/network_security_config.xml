@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Release: solo HTTPS. Se prohíbe el tráfico en claro (HTTP) y solo se
+  confía en las CA del sistema (no en CA instaladas por el usuario).
+  Para certificate pinning ver mobile/store/SEGURIDAD.md.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -33,6 +33,7 @@ $es_gerencia   = $sesion_activa && ($_SESSION['rol'] ?? '') === 'gerencia';
         <li><a href="acerca.php">Acerca de</a></li>
         <li><a href="asistente.php">Asistente Virtual</a></li>
         <li><a href="contacto.php">¡Contáctanos!</a></li>
+        <li><a href="descargar.php" style="color:var(--letras-especiales);">📱 Descargar app</a></li>
     </ul>
     <div class="navacciones">
         <?php if ($sesion_activa): ?>
@@ -52,6 +53,7 @@ $es_gerencia   = $sesion_activa && ($_SESSION['rol'] ?? '') === 'gerencia';
             <li><a href="gestionar_avances.php" style="color:var(--letras-especiales);">Gestionar Avances VR</a></li>
         <?php endif; ?>
         <li><a href="contacto.php">Contacto</a></li>
+        <li><a href="descargar.php">📱 App</a></li>
     </ul>
     <div class="navacciones">
         <a href="logout.php" class="btn-registro" style="background-color:#dc2626;">Cerrar Sesión</a>

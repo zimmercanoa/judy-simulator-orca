@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../services/pantalla_segura.dart';
 import '../state/session.dart';
 import '../utils/validadores.dart';
 import '../widgets/common.dart';
@@ -12,7 +13,8 @@ class RegistroScreen extends StatefulWidget {
   State<RegistroScreen> createState() => _RegistroScreenState();
 }
 
-class _RegistroScreenState extends State<RegistroScreen> {
+class _RegistroScreenState extends State<RegistroScreen>
+    with PantallaSeguraMixin<RegistroScreen> {
   final _form = GlobalKey<FormState>();
   final _matricula = TextEditingController();
   final _nombre = TextEditingController();
