@@ -16,7 +16,9 @@ class SessionController extends ChangeNotifier {
   })  : _store = store,
         _realFactory = realApiFactory ?? (() => HttpJudyApi()),
         _demoFactory = demoApiFactory ?? (() => DemoJudyApi()) {
-    _api = AppConfig.forceDemo ? _demoFactory() : _realFactory();
+    _api = (AppConfig.forceDemo || !AppConfig.apiConfigurada)
+        ? _demoFactory()
+        : _realFactory();
   }
 
   final TokenStore _store;
@@ -24,6 +26,9 @@ class SessionController extends ChangeNotifier {
   final JudyApi Function() _demoFactory;
 
   late JudyApi _api;
+
+  static bool get _usarRealPorDefecto =>
+      !AppConfig.forceDemo && AppConfig.apiConfigurada;
   Usuario? _usuario;
   bool _restaurado = false;
 
@@ -89,7 +94,7 @@ class SessionController extends ChangeNotifier {
     }
     await _store.clear();
     _usuario = null;
-    if (!AppConfig.forceDemo && _api.esDemo) _api = _realFactory();
+    if (_usarRealPorDefecto && _api.esDemo) _api = _realFactory();
     notifyListeners();
   }
 
@@ -99,7 +104,7 @@ class SessionController extends ChangeNotifier {
     await _store.clear();
     _api.token = null;
     _usuario = null;
-    if (!AppConfig.forceDemo && _api.esDemo) _api = _realFactory();
+    if (_usarRealPorDefecto && _api.esDemo) _api = _realFactory();
     notifyListeners();
   }
 

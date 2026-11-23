@@ -1,0 +1,74 @@
+name: Despliegue a alwaysdata
+
+# Sitio completo (web + api/) en alwaysdata, sin el desafío anti-bots de
+# InfinityFree. deploy.yml (InfinityFree) se mantiene como respaldo.
+# Guía: DESPLIEGUE_ALWAYSDATA.md
+#
+# Secrets (Settings → Secrets and variables → Actions → Secrets):
+#   ALWAYSDATA_FTP_SERVER    ftp-<cuenta>.alwaysdata.net
+#   ALWAYSDATA_FTP_USER      <cuenta> (o un usuario FTP adicional)
+#   ALWAYSDATA_FTP_PASSWORD  contraseña de ese usuario
+# Variable opcional (pestaña Variables):
+#   ALWAYSDATA_SERVER_DIR    carpeta destino, por defecto www/
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-alwaysdata
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Despliegue vía FTPS
+    runs-on: ubuntu-latest
+    env:
+      FTP_SERVER: ${{ secrets.ALWAYSDATA_FTP_SERVER }}
+    steps:
+      - name: Comprobar configuración
+        id: cfg
+        run: |
+          if [ -z "$FTP_SERVER" ]; then
+            echo "::notice::Faltan los secrets ALWAYSDATA_FTP_*; se omite el despliegue (ver DESPLIEGUE_ALWAYSDATA.md)."
+            echo "listo=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "listo=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Obtener código
+        if: steps.cfg.outputs.listo == 'true'
+        uses: actions/checkout@v4
+
+      - name: Sincronizar archivos hacia alwaysdata
+        if: steps.cfg.outputs.listo == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.ALWAYSDATA_FTP_SERVER }}
+          username: ${{ secrets.ALWAYSDATA_FTP_USER }}
+          password: ${{ secrets.ALWAYSDATA_FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./
+          server-dir: ${{ vars.ALWAYSDATA_SERVER_DIR || 'www/' }}
+          # Mismas exclusiones que deploy.yml (config.php vive solo en el servidor)
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            .gemini/**
+            .agents/**
+            tools/**
+            gems/**
+            mobile/**
+            sql/**
+            **/*.sql
+            **/*.md
+            **/*.docx
+            skills-lock.json
+            config.php
+            config.sample.php
+            setup_orca.ps1
+            setup_orca.sh

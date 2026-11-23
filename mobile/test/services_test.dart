@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:judy_simulator/config.dart';
 import 'package:judy_simulator/models/avance.dart';
 import 'package:judy_simulator/models/usuario.dart';
 import 'package:judy_simulator/services/demo_judy_api.dart';
@@ -158,6 +159,23 @@ void main() {
           retroalimentacion: 'Bien');
       expect(enviado['estado'], 'En Progreso');
       expect(a.porcentaje, 80);
+    });
+  });
+
+  group('Configuración de servidor', () {
+    test('sin SITE_URL la app usa el marcador y arranca en demo', () {
+      expect(AppConfig.apiBaseUrl, 'https://CUENTA.alwaysdata.net/api');
+      expect(AppConfig.apiConfigurada, isFalse);
+      expect(AppConfig.webUrl, 'https://judysimulator.wuaze.com');
+      expect(SessionController(store: MemoryTokenStore()).esDemo, isTrue);
+    });
+
+    test('el cliente HTTP no llama al marcador', () {
+      final api = HttpJudyApi(
+        client: MockClient((_) async => fail('no debe hacer peticiones')),
+      );
+      expect(() => api.me(),
+          throwsA(isA<ApiException>().having((e) => e.mensaje, 'mensaje', contains('SITE_URL'))));
     });
   });
 

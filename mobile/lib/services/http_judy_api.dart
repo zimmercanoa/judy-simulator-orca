@@ -36,6 +36,8 @@ class HttpJudyApi implements JudyApi {
         'Accept': 'application/json',
         if (json) 'Content-Type': 'application/json; charset=utf-8',
         if (token != null) 'Authorization': 'Bearer $token',
+        // Respaldo si el hosting descarta Authorization (PHP como CGI).
+        'X-Api-Token': ?token,
       };
 
   Future<Map<String, dynamic>> _get(String endpoint,
@@ -52,6 +54,11 @@ class HttpJudyApi implements JudyApi {
 
   Future<Map<String, dynamic>> _send(
       Future<http.Response> Function() request) async {
+    if (baseUrl.contains('CUENTA.alwaysdata.net')) {
+      throw const ApiException(
+          'Esta compilación no tiene servidor configurado (SITE_URL). '
+          'Usa el modo demo.');
+    }
     final http.Response res;
     try {
       res = await request().timeout(timeout);
@@ -73,8 +80,8 @@ class HttpJudyApi implements JudyApi {
     if (esDesafioAntiBot(body)) {
       throw ApiException(
         'El hosting del servidor bloqueó la app con un desafío anti-bots '
-        '(InfinityFree). La API debe publicarse en otro hosting; mientras '
-        'tanto usa el modo demo o el portal web.',
+        '(InfinityFree). Compila la app con SITE_URL apuntando a alwaysdata; '
+        'mientras tanto usa el modo demo o el portal web.',
         status: res.statusCode,
         antiBot: true,
       );

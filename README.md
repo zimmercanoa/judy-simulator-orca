@@ -7,7 +7,8 @@ Plataforma web PHP para capacitación en seguridad industrial con realidad virtu
 - `*.php` — páginas públicas, panel y procesadores de formularios.
 - `config.php` — credenciales reales (ignorado por Git; **no subir**).
 - `config.sample.php` — plantilla sin secretos para crear `config.php`.
-- `JuDyb.sql` — esquema MySQL compatible con InfinityFree (sin `CREATE DATABASE` ni `USE`).
+- `JuDyb.sql` — esquema MySQL (sin `CREATE DATABASE` ni `USE`; se importa igual en alwaysdata e InfinityFree).
+- `sql/migracion_api_tokens.sql` — tablas de la API móvil.
 - `assets/` — CSS, imágenes y PHPMailer.
 - `GEMINI.md` — reglas obligatorias de producción.
 - `.gemini/commands/` — comandos de auditoría y adaptación a InfinityFree.
@@ -25,17 +26,14 @@ Plataforma web PHP para capacitación en seguridad industrial con realidad virtu
 
 > Guarda todos los `.php` en **UTF-8 sin BOM**. Un BOM antes de `<?php` envía salida antes de las cabeceras y rompe `header('Location: ...')` y `session_start()`.
 
-## Despliegue en InfinityFree
+## Despliegue
 
-**Sitio en producción:** https://judysimulator.wuaze.com — cuenta InfinityFree `if0_43331816`.
-Las credenciales (MySQL/FTP/Gmail) no se versionan; se obtienen en el vPanel y se cargan como GitHub Secrets o en `config.php` del servidor.
+El sitio se publica desde `master` con GitHub Actions en dos hostings. Resumen y comparación en **[DESPLIEGUE.md](DESPLIEGUE.md)**.
 
-1. Crea el subdominio y la base de datos en el vPanel (ej. `if0_XXXXXXX_judyb`).
-2. Importa `JuDyb.sql` desde phpMyAdmin.
-3. Sube todos los archivos a `htdocs` (excepto `config.php`).
-4. Crea `config.php` en el servidor usando `config.sample.php` como guía con los datos reales del vPanel y tu contraseña de aplicación de Gmail.
-5. Asegúrate de que la rama por defecto del repositorio apunte al código actual (`master` contiene la última versión; `main` puede estar desactualizada).
-6. El flujo `.github/workflows/deploy.yml` sincroniza `master` por FTP al subir cambios, pero **excluye `config.php`**. Configura los secrets `FTP_SERVER`, `FTP_USERNAME` y `FTP_PASSWORD` en GitHub y crea `config.php` manualmente una vez en `htdocs`.
+- **alwaysdata (principal):** `https://CUENTA.alwaysdata.net` — sitio + API para la app móvil. Workflow `deploy-alwaysdata.yml`, guía paso a paso en [DESPLIEGUE_ALWAYSDATA.md](DESPLIEGUE_ALWAYSDATA.md).
+- **InfinityFree (respaldo):** https://judysimulator.wuaze.com — solo web en navegador (su desafío anti-bots bloquea la app). Workflow `deploy.yml`, guía en [DESPLIEGUE_INFINITYFREE.md](DESPLIEGUE_INFINITYFREE.md).
+
+En ambos: importa `JuDyb.sql` y `sql/migracion_api_tokens.sql`, crea `config.php` a mano en el servidor a partir de `config.sample.php` (nunca se sube a Git ni por FTP) y carga los secrets FTP en GitHub. La rama con la versión actual es `master`.
 
 ## Seguridad aplicada
 
@@ -55,4 +53,6 @@ Las credenciales (MySQL/FTP/Gmail) no se versionan; se obtienen en el vPanel y s
 
 - [`mobile/`](mobile/README.md): app Flutter (Android/iOS) con login, registro, progreso VR, panel de gerencia, asistente, normas STPS y contacto. Incluye **modo demo** sin servidor.
 - [`api/`](api/README.md): API REST JSON con tokens Bearer para la app. Requiere ejecutar una vez `sql/migracion_api_tokens.sql`.
-- ⚠️ El plan gratuito de InfinityFree responde a las apps nativas con un desafío JavaScript anti-bots en lugar de JSON; para usar la API desde la app hay que publicarla en otro hosting. Detalles y opciones en [`mobile/README.md`](mobile/README.md#️-hallazgo-infinityfree-bloquea-las-apps-nativas).
+- La app usa la API publicada en **alwaysdata** (`SITE_URL`); InfinityFree gratuito responde a las apps nativas con un desafío JavaScript anti-bots. Detalles en [`mobile/README.md`](mobile/README.md).
+- APK: se descarga desde `descargar.php`; se compila y publica en GitHub Releases con el workflow `build-apk.yml` al crear un tag `mobile-vX.Y.Z` ([guía](mobile/store/DISTRIBUCION_APK.md)).
+- Privacidad y eliminación de cuenta: `privacidad.php`, `eliminar_cuenta.php` y `api/eliminar_cuenta.php`.

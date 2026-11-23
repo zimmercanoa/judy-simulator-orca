@@ -39,17 +39,23 @@ flutter pub get
 flutter run --dart-define=DEMO_MODE=true
 
 # Contra una API real
-flutter run --dart-define=API_BASE_URL=https://tu-servidor.com/api
+flutter run --dart-define=SITE_URL=https://CUENTA.alwaysdata.net
 
 # APK de depuración
-flutter build apk --debug --dart-define=API_BASE_URL=https://tu-servidor.com/api
+flutter build apk --debug --dart-define=SITE_URL=https://CUENTA.alwaysdata.net
 ```
 
 | `--dart-define` | Valor por defecto | Uso |
 | --- | --- | --- |
-| `API_BASE_URL` | `https://judysimulator.wuaze.com/api` | URL de la carpeta `api/` (sin barra final). |
+| `SITE_URL` | `https://CUENTA.alwaysdata.net` (**marcador**) | Sitio PHP en alwaysdata; la API es `SITE_URL/api`. Reemplaza `CUENTA` por la cuenta real. |
+| `API_BASE_URL` | `SITE_URL/api` | Solo si la API vive en otro sitio (sin barra final). |
 | `DEMO_MODE` | `false` | `true` arranca siempre en modo demo. |
-| `WEB_URL` | `https://judysimulator.wuaze.com` | Portal web que abre el botón de Contacto. |
+
+Mientras `SITE_URL` siga siendo el marcador, la app arranca en **modo demo** y
+los enlaces de privacidad/descarga abren el sitio de respaldo
+(`judysimulator.wuaze.com`), que funciona en navegadores. Para no tener que
+pasar el `--dart-define`, también puedes editar el valor por defecto en
+`lib/config.dart`. En GitHub Actions se toma de la variable `SITE_URL`.
 
 Aunque no se pase `DEMO_MODE`, la pantalla de login tiene los botones
 **Empleado / Gerencia** y el interruptor *Usar datos simulados*.
@@ -57,7 +63,7 @@ Usuarios demo: `EMP-001` o `GER-001`, contraseña `demo1234`.
 
 ## Distribución
 
-La APK se descarga desde `https://judysimulator.wuaze.com/descargar.php` y se
+La APK se descarga desde `descargar.php` del sitio (alwaysdata o el respaldo en InfinityFree) y se
 aloja en GitHub Releases (tag `mobile-vX.Y.Z`). Pasos para compilar, firmar y
 publicar: [store/DISTRIBUCION_APK.md](store/DISTRIBUCION_APK.md). Medidas de
 seguridad y opciones: [store/SEGURIDAD.md](store/SEGURIDAD.md).
@@ -112,28 +118,18 @@ el endpoint del asistente es `api/asistente.php`.
 La app lo detecta (`HttpJudyApi.esDesafioAntiBot`) y muestra un mensaje claro
 con el botón **Usar modo demo**, en lugar de fallar con un error de JSON.
 
-### Opciones
+### Decisión: sitio completo en alwaysdata
 
-1. **Publicar la API en otro hosting (recomendado).** La carpeta `api/` es PHP
-   8.1 sin dependencias nuevas; funciona en cualquier hosting PHP + MySQL sin
-   protección anti-bots: un plan de pago (InfinityFree Premium/iFastNet,
-   Hostinger, etc.), un VPS pequeño, o Render/Railway/Fly.io con un contenedor
-   PHP-Apache. Pasos:
-   1. Subir el sitio (o solo `config.php`, `assets/lib/PHPMailer` y `api/`).
-   2. Ejecutar `JuDyb.sql` y `sql/migracion_api_tokens.sql` en la BD (o apuntar
-      `config.php` a la BD remota si el proveedor permite conexiones externas;
-      InfinityFree **no** las permite, así que habría que migrar los datos).
-   3. Compilar la app con `--dart-define=API_BASE_URL=https://nuevo-host/api`.
-2. **WebView como respaldo.** Mostrar el sitio web dentro de la app con
-   `webview_flutter`: el WebView ejecuta JavaScript y supera el desafío, pero
-   se pierde la experiencia nativa (se usarían las páginas PHP con sesión) y la
-   API JSON seguiría sin poder usarse. Hoy la app ofrece el botón *Abrir portal
-   web* en Contacto, que abre el navegador del sistema.
-3. **No recomendado:** calcular la cookie `__test` imitando `aes.js` dentro de
-   la app. Es frágil (InfinityFree cambia las claves), viola los términos del
-   hosting y puede bloquear la cuenta.
+El dueño eligió publicar el sitio completo (web + `api/` + BD) en **alwaysdata**
+(plan gratuito, sin desafío JavaScript) y dejar InfinityFree como respaldo web.
+La app usa `SITE_URL=https://CUENTA.alwaysdata.net`. Pasos:
+[`../DESPLIEGUE_ALWAYSDATA.md`](../DESPLIEGUE_ALWAYSDATA.md). Sin WebView.
 
-Mientras no se migre la API, la app queda **plenamente funcional en modo demo**.
+Alternativas descartadas: WebView del sitio (se pierde la app nativa y la API
+seguiría inaccesible) y calcular la cookie `__test` imitando `aes.js` (frágil y
+contrario a los términos del hosting).
+
+Mientras no haya `SITE_URL`, la app queda **plenamente funcional en modo demo**.
 
 ## API REST (resumen)
 

@@ -4,14 +4,14 @@
 #  comando para publicar) el GitHub Release mobile-vX.Y.Z.
 #
 #  Uso (PowerShell, desde la carpeta mobile/):
-#    .\store\scripts\publicar_release.ps1 [-ApiBaseUrl https://.../api] [-Notas "..."] [-Publicar]
+#    .\store\scripts\publicar_release.ps1 [-SiteUrl https://CUENTA.alwaysdata.net] [-Notas "..."] [-Publicar]
 #
 #  Requisitos: Flutter, Android SDK, android/key.properties con el
 #  keystore de release (ver DISTRIBUCION_APK.md) y, para -Publicar,
 #  GitHub CLI con sesión (gh auth login).
 # ============================================================
 param(
-    [string]$ApiBaseUrl = "",
+    [string]$SiteUrl = "",
     [string]$Notas = "",
     [string]$Repo = "zimmercanoa/judy-simulator-orca",
     [switch]$Publicar
@@ -39,7 +39,7 @@ $simbolos = Join-Path $env:USERPROFILE "judy-simbolos\$version"
 New-Item -ItemType Directory -Force $simbolos | Out-Null
 
 $defines = @()
-if ($ApiBaseUrl -ne "") { $defines += "--dart-define=API_BASE_URL=$ApiBaseUrl" }
+if ($SiteUrl -ne "") { $defines += "--dart-define=SITE_URL=$SiteUrl" } else { Write-Warning "Sin -SiteUrl la APK arrancará en modo demo." }
 
 flutter pub get
 flutter test
