@@ -32,6 +32,12 @@ define('APP_URL', 'https://judysimulator.wuaze.com');
 define('GEMINI_API_KEY', 'TU_GEMINI_API_KEY');
 define('GEMINI_MODEL',   'gemini-3.8-flash');
 
+// --- API REST móvil (api/) ----------------------------------
+// Orígenes permitidos para CORS, separados por coma. Las apps nativas
+// (Android/iOS) NO necesitan CORS; déjalo vacío salvo que publiques una
+// compilación Flutter Web. Ejemplo: 'https://app.ejemplo.com'
+define('API_CORS_ORIGINS', '');
+
 // --- Conexión centralizada a la base de datos ---------------
 if (!isset($conexion) || !($conexion instanceof mysqli)) {
     $conexion = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);

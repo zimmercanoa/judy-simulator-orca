@@ -1,0 +1,38 @@
+name: CI (PHP lint + Flutter)
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  php-lint:
+    name: php -l (PHP 8.1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: none
+      - name: Sintaxis de todos los .php
+        run: |
+          set -e
+          find . -name '*.php' -not -path './assets/lib/*' -print0 | xargs -0 -n1 php -l
+      - name: Auditoría JuDy
+        run: python3 tools/judy_audit.py --strict
+
+  flutter:
+    name: flutter analyze + test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test

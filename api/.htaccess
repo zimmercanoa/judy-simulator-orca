@@ -1,0 +1,27 @@
+# ============================================================
+#  api/.htaccess — API REST JSON de JuDy Simulator
+# ============================================================
+
+# Apache + PHP CGI/FPM descarta la cabecera Authorization; la
+# reenviamos como variable de entorno para que PHP la vea.
+<IfModule mod_setenvif.c>
+    SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1
+</IfModule>
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+# Los archivos auxiliares (prefijo "_") no son endpoints públicos.
+<FilesMatch "^_">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+Options -Indexes

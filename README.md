@@ -50,3 +50,9 @@ Las credenciales (MySQL/FTP/Gmail) no se versionan; se obtienen en el vPanel y s
 
 - Rota cualquier contraseña de Gmail que haya aparecido en chats o historiales y usa solo una contraseña de aplicación en `config.php`.
 - Revisa los datos de prueba de `JuDyb.sql` (correos y teléfonos de ejemplo).
+
+## App móvil y API REST
+
+- [`mobile/`](mobile/README.md): app Flutter (Android/iOS) con login, registro, progreso VR, panel de gerencia, asistente, normas STPS y contacto. Incluye **modo demo** sin servidor.
+- [`api/`](api/README.md): API REST JSON con tokens Bearer para la app. Requiere ejecutar una vez `sql/migracion_api_tokens.sql`.
+- ⚠️ El plan gratuito de InfinityFree responde a las apps nativas con un desafío JavaScript anti-bots en lugar de JSON; para usar la API desde la app hay que publicarla en otro hosting. Detalles y opciones en [`mobile/README.md`](mobile/README.md#️-hallazgo-infinityfree-bloquea-las-apps-nativas).
