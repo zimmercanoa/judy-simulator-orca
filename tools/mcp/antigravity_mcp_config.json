@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@playwright/mcp@0.0.85", "--headless", "--isolated"]
+    },
+    "github": {
+      "command": "cmd",
+      "args": [
+        "/c", "npx", "-y", "mcp-remote@0.16.5",
+        "https://api.githubcopilot.com/mcp/",
+        "--transport", "http-only",
+        "--header", "Authorization:Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}",
+        "--header", "X-MCP-Toolsets:repos,pull_requests,actions,issues",
+        "--header", "X-MCP-Readonly:true"
+      ]
+    },
+    "context7": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@upstash/context7-mcp@4.6.0"]
+    }
+  }
+}

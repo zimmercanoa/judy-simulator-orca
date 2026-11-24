@@ -26,7 +26,7 @@ PREFIX = "JuDy_Simulator/"
 
 EXCLUDED_NAMES = {"config.php", ".DS_Store", "Thumbs.db", "desktop.ini"}
 EXCLUDED_SUFFIXES = {".pyc", ".log", ".tmp", ".zip", ".bak", ".swp"}
-EXCLUDED_PARTS = {"__pycache__", ".venv", "node_modules"}
+EXCLUDED_PARTS = {"__pycache__", ".venv", "node_modules", ".playwright-mcp"}
 
 # Solo contraseñas y tokens se consideran secretos. El correo, el host y la URL
 # son datos de configuración: pueden aparecer en el historial sin filtrar claves.
@@ -38,7 +38,19 @@ PLACEHOLDERS = {
 SECRET_PATTERNS = (
     rb"ghp_[A-Za-z0-9]{20,}",
     rb"github_pat_[A-Za-z0-9_]{20,}",
+    rb"gh[osur]_[A-Za-z0-9]{30,}",  # p. ej. el token de `gh auth token`
 )
+
+
+# Configuración MCP compartida (sin tokens: se leen de variables de entorno).
+MCP_FILES = (".mcp.json", "opencode.json", ".gemini/settings.json",
+             "tools/mcp/antigravity_mcp_config.json")
+
+
+def gemini_allowed(parts: tuple[str, ...]) -> bool:
+    return len(parts) >= 2 and (
+        parts[1] == "commands" or (len(parts) == 2 and parts[1] == "settings.json")
+    )
 
 
 def should_include(rel: Path) -> bool:
@@ -51,9 +63,10 @@ def should_include(rel: Path) -> bool:
         return False
     if rel.suffix.lower() in EXCLUDED_SUFFIXES:
         return False
-    # De .gemini solo se exportan los comandos compartidos; nunca chats ni datos de cuenta.
+    # De .gemini solo se exportan los comandos compartidos y settings.json (mcpServers);
+    # nunca chats ni datos de cuenta.
     if parts[0] == ".gemini":
-        return len(parts) >= 2 and parts[1] == "commands"
+        return gemini_allowed(parts)
     return True
 
 
@@ -131,12 +144,14 @@ def build() -> None:
             if rel.name in EXCLUDED_NAMES or rel.suffix.lower() in EXCLUDED_SUFFIXES:
                 forbidden.append(name)
             parts = rel.parts
-            if parts and parts[0] == ".gemini" and (
-                len(parts) < 2 or parts[1] != "commands"
-            ):
+            parts = parts[1:]  # quitar PREFIX
+            if parts and parts[0] == ".gemini" and not gemini_allowed(parts):
                 forbidden.append(name)
         if forbidden:
             raise SystemExit(f"ERROR: archivos no permitidos en el ZIP: {forbidden[:5]}")
+        missing = [f for f in MCP_FILES if (ROOT / f).exists() and PREFIX + f not in names]
+        if missing:
+            raise SystemExit(f"ERROR: faltan archivos MCP en el ZIP: {missing}")
 
         for info in zf.infolist():
             if info.file_size > 5_000_000:

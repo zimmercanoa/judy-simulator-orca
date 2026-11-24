@@ -5,7 +5,8 @@ judy_audit.py — Auditor determinista del proyecto JuDy Simulator.
 
 Centraliza las comprobaciones que todos los agentes (Gemini CLI, Antigravity,
 OpenCode, etc.) necesitan repetir antes de tocar código o desplegar:
-UTF-8 sin BOM, secretos, compatibilidad InfinityFree, SQL, CSRF y excludes FTP.
+UTF-8 sin BOM, secretos, compatibilidad InfinityFree, SQL, CSRF, excludes FTP y
+configuración MCP sin tokens.
 
 Uso:
     python tools/judy_audit.py
@@ -114,6 +115,29 @@ def check_secrets(root: Path, files, tracked, findings):
                         f"{label} con valor literal en archivo NO versionado (valor oculto: ****). Verificar que nunca se suba.")
     if "config.php" in tracked:
         add(findings, ERROR, "SEC-003", "config.php", "config.php está versionado en Git; debe estar solo en .gitignore.")
+
+
+MCP_CONFIGS = (".mcp.json", "opencode.json", ".gemini/settings.json",
+               "tools/mcp/antigravity_mcp_config.json")
+TOKEN_LITERAL = re.compile(r"(gh[opsur]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|ctx7sk-[A-Za-z0-9-]{10,})")
+
+
+def check_mcp(root: Path, findings):
+    """Las configuraciones MCP compartidas solo pueden referenciar tokens por variable de entorno."""
+    for rel in MCP_CONFIGS:
+        path = root / rel
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        try:
+            json.loads(text)
+        except ValueError as exc:
+            add(findings, ERROR, "MCP-001", rel, f"JSON inválido: {exc}")
+        if TOKEN_LITERAL.search(text):
+            add(findings, ERROR, "MCP-002", rel,
+                "Token literal en configuración MCP (valor oculto: ****). Usa la variable GITHUB_PERSONAL_ACCESS_TOKEN y rota el token.")
+        if "@latest" in text:
+            add(findings, WARN, "MCP-003", rel, "Versión @latest en un servidor MCP; fija una versión concreta.")
 
 
 def check_sql(root: Path, findings):
@@ -272,6 +296,7 @@ def main() -> int:
 
     check_encoding(root, files, tracked, findings)
     check_secrets(root, files, tracked, findings)
+    check_mcp(root, findings)
     check_sql(root, findings)
     check_php_conventions(root, files, findings)
     check_deploy(root, findings)

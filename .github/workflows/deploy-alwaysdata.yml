@@ -68,6 +68,9 @@ jobs:
             **/*.md
             **/*.docx
             skills-lock.json
+            .mcp.json
+            opencode.json
+            .playwright-mcp/**
             config.php
             config.sample.php
             setup_orca.ps1

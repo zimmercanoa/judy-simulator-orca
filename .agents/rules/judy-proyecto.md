@@ -25,3 +25,4 @@ La especificación completa está en `GEMINI.md`; esta regla es el recordatorio 
 2. Usa la skill que corresponda: `predeploy-audit`, `infinity-sql`, `seguridad-php`, `prod-monitor`, `gem-sync`.
 3. Después del deploy: `python tools/judy_monitor.py --url <URL_PUBLICA>`.
 4. Si añades una herramienta nueva, actualiza la skill canónica y ejecuta `python tools/judy_gem_sync.py --write`.
+5. Para verificar producción, leer PRs/Actions o consultar documentación usa los MCP compartidos (`playwright`, `github`, `context7`) según `.agents/rules/mcp.md`.

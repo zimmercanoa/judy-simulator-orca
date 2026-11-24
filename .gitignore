@@ -8,10 +8,15 @@ Thumbs.db
 *.log
 *.zip
 
-# Gemini CLI: se versionan solo los comandos compartidos; el resto es local.
+# Gemini CLI: se versionan solo los comandos compartidos y settings.json
+# (únicamente mcpServers portables, sin tokens); el resto es local.
 .gemini/*
 !.gemini/commands/
 !.gemini/commands/**
+!.gemini/settings.json
+
+# Salidas locales del MCP de Playwright (snapshots/capturas: pueden contener datos)
+.playwright-mcp/
 
 # App móvil: firma Android y credenciales de Google Play — NUNCA subir
 key.properties
@@ -22,3 +27,6 @@ key.properties
 play-service-account*.json
 mobile/android/fastlane/*.json
 mobile/build/
+
+# Python
+__pycache__/
