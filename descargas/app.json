@@ -1,0 +1,10 @@
+{
+  "version": "0.1.0",
+  "version_code": 1,
+  "publicada": false,
+  "fecha": "",
+  "android_minimo": "Android 7.0 (API 24)",
+  "release_url": "https://github.com/zimmercanoa/judy-simulator-orca/releases/latest",
+  "notas": "Primera versión: inicio de sesión, registro, progreso VR, panel de gerencia, asistente virtual, normas NOM-009/NOM-029, contacto y eliminación de cuenta.",
+  "apks": []
+}

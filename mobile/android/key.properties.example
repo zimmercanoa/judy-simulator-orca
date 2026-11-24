@@ -1,0 +1,8 @@
+# Copia este archivo como android/key.properties (está en .gitignore)
+# y completa los valores. NUNCA subas key.properties ni el .jks al repo.
+storePassword=CAMBIA_ESTA_CONTRASENA
+keyPassword=CAMBIA_ESTA_CONTRASENA
+keyAlias=judy-release
+# Ruta al keystore de release, relativa a android/app/ o absoluta.
+# Recomendado: guardarlo fuera del repo, p. ej. C:/Users/TU_USUARIO/judy-claves/judy-release.jks
+storeFile=C:/Users/TU_USUARIO/judy-claves/judy-release.jks

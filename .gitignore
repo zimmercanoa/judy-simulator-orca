@@ -12,3 +12,13 @@ Thumbs.db
 .gemini/*
 !.gemini/commands/
 !.gemini/commands/**
+
+# App móvil: firma Android y credenciales de Google Play — NUNCA subir
+key.properties
+*.jks
+*.keystore
+*.p12
+*.pepk
+play-service-account*.json
+mobile/android/fastlane/*.json
+mobile/build/

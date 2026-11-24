@@ -1,0 +1,161 @@
+name: Compilar APK (release firmada)
+
+# Al subir un tag mobile-vX.Y.Z compila las APK firmadas por ABI y las
+# publica como assets del GitHub Release, con SHA256SUMS.txt y el
+# descargas-app.json listo para copiar en descargas/app.json.
+# Guía: mobile/store/DISTRIBUCION_APK.md
+#
+# Secrets:
+#   ANDROID_KEYSTORE_BASE64    keystore .jks en base64
+#   ANDROID_KEYSTORE_PASSWORD  contraseña del keystore
+#   ANDROID_KEY_ALIAS          alias (p. ej. judy-release)
+#   ANDROID_KEY_PASSWORD       contraseña de la clave (igual a la del keystore si se usó el script)
+# Variable:
+#   SITE_URL                   https://<cuenta>.alwaysdata.net  (sitio + api/)
+
+on:
+  push:
+    tags:
+      - 'mobile-v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag existente a compilar (p. ej. mobile-v0.1.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    name: APK release
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      SITE_URL: ${{ vars.SITE_URL }}
+      REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Validar tag, versión y configuración
+        env:
+          HAY_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        run: |
+          set -euo pipefail
+          version=$(grep -E '^version:' pubspec.yaml | sed -E 's/version:\s*([0-9]+\.[0-9]+\.[0-9]+)\+([0-9]+).*/\1/')
+          code=$(grep -E '^version:' pubspec.yaml | sed -E 's/version:\s*[0-9.]+\+([0-9]+).*/\1/')
+          if [ "mobile-v$version" != "$TAG" ]; then
+            echo "::error::El tag $TAG no coincide con version: $version de pubspec.yaml"; exit 1
+          fi
+          if [ "$HAY_KEYSTORE" != "true" ]; then
+            echo "::error::Falta el secret ANDROID_KEYSTORE_BASE64: no se publica una APK sin la clave de release."; exit 1
+          fi
+          if [ -z "$SITE_URL" ]; then
+            echo "::warning::Variable SITE_URL vacía: la APK arrancará en modo demo."
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$code" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.4
+          cache: true
+
+      - name: Restaurar keystore (solo en el runner)
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          echo "$KS_B64" | base64 --decode > "$RUNNER_TEMP/release.jks"
+          umask 077
+          {
+            echo "storePassword=$KS_PASS"
+            echo "keyPassword=$KEY_PASS"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "storeFile=$RUNNER_TEMP/release.jks"
+          } > android/key.properties
+
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+      - name: Compilar APK por ABI (ofuscada)
+        run: |
+          set -euo pipefail
+          defines=()
+          if [ -n "$SITE_URL" ]; then defines+=(--dart-define=SITE_URL="$SITE_URL"); fi
+          flutter build apk --release --split-per-abi --obfuscate \
+            --split-debug-info="$RUNNER_TEMP/simbolos" "${defines[@]}"
+
+      - name: Renombrar, calcular SHA-256 y generar descargas-app.json
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            src="build/app/outputs/flutter-apk/app-$abi-release.apk"
+            if [ -f "$src" ]; then cp "$src" "dist/judy-simulator-$VERSION-$abi.apk"; fi
+          done
+          (cd dist && sha256sum *.apk > SHA256SUMS.txt && cat SHA256SUMS.txt)
+          python3 - <<'PY'
+          import json, os, hashlib, datetime, pathlib
+          v, tag, repo = os.environ["VERSION"], os.environ["TAG"], os.environ["REPO"]
+          apks = []
+          for abi in ["arm64-v8a", "armeabi-v7a", "x86_64"]:
+              f = pathlib.Path(f"dist/judy-simulator-{v}-{abi}.apk")
+              if f.exists():
+                  apks.append({
+                      "abi": abi, "archivo": f.name, "tamano_bytes": f.stat().st_size,
+                      "sha256": hashlib.sha256(f.read_bytes()).hexdigest(),
+                      "url": f"https://github.com/{repo}/releases/download/{tag}/{f.name}",
+                  })
+          data = {
+              "version": v, "version_code": int(os.environ["VERSION_CODE"]), "publicada": True,
+              "fecha": datetime.date.today().isoformat(), "android_minimo": "Android 7.0 (API 24)",
+              "release_url": f"https://github.com/{repo}/releases/tag/{tag}",
+              "notas": "", "apks": apks,
+          }
+          pathlib.Path("dist/descargas-app.json").write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          PY
+
+      - name: Publicar en GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: JuDy Simulator ${{ env.VERSION }} (Android)
+          body: |
+            APK firmadas de JuDy Simulator ${{ env.VERSION }}.
+            - **arm64-v8a**: casi todos los teléfonos actuales (recomendada).
+            - **armeabi-v7a**: teléfonos antiguos de 32 bits.
+            - **x86_64**: emuladores.
+
+            Verifica el SHA-256 con `SHA256SUMS.txt` antes de instalar.
+            `descargas-app.json` es el contenido para `descargas/app.json` del sitio.
+          files: |
+            mobile/dist/*.apk
+            mobile/dist/SHA256SUMS.txt
+            mobile/dist/descargas-app.json
+
+      - name: Guardar símbolos de depuración (privados, 90 días)
+        uses: actions/upload-artifact@v4
+        with:
+          name: simbolos-${{ env.VERSION }}
+          path: ${{ runner.temp }}/simbolos
+          retention-days: 90
+
+      - name: Limpiar keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks" android/key.properties

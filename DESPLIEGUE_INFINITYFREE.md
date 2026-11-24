@@ -1,5 +1,10 @@
 # Despliegue en InfinityFree — JuDy Simulator
 
+> **InfinityFree queda como respaldo.** El hosting principal es alwaysdata
+> ([DESPLIEGUE_ALWAYSDATA.md](DESPLIEGUE_ALWAYSDATA.md)), porque el plan gratuito de
+> InfinityFree responde a la app móvil con un desafío JavaScript anti-bots
+> (`aes.js` / cookie `__test`) en lugar de JSON. Resumen de ambos: [DESPLIEGUE.md](DESPLIEGUE.md).
+
 Guía operativa con los datos concretos de la cuenta. **Ninguna contraseña se guarda en este repositorio.**
 
 ## Datos de la cuenta (no sensibles)
@@ -20,7 +25,8 @@ Guía operativa con los datos concretos de la cuenta. **Ninguna contraseña se g
 
 1. vPanel → **MySQL Databases** → phpMyAdmin de `if0_43331816_JuDyb`.
 2. Importa `JuDyb.sql` (usa la pestaña *Import*). El dump no incluye `CREATE DATABASE` ni `USE`, compatible con InfinityFree.
-3. Verifica que existan las tablas `usuarios` y `avances_vr` (en minúsculas; `lower_case_table_names=0`).
+3. Importa también `sql/migracion_api_tokens.sql` (tablas de la API móvil `api_tokens` y `api_rate_limits`).
+4. Verifica que existan las tablas `usuarios` y `avances_vr` (en minúsculas; `lower_case_table_names=0`).
 
 ## 2. config.php en el servidor (una sola vez)
 
