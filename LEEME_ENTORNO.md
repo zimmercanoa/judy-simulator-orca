@@ -12,6 +12,9 @@ equipo con **Orca** pueda trabajar con las mismas reglas, skills y comandos.
 - Comandos derivados para Gemini CLI: `.gemini/commands/judy/*.toml` y `.gemini/commands/*.toml`.
 - Gems para la app Gemini en `gems/`.
 - Scripts deterministas en `tools/`: `judy_gem_sync.py`, `judy_audit.py`, `judy_monitor.py` y `build_portable_zip.py`.
+- Servidores MCP compartidos (Playwright, GitHub solo lectura, Context7): `.mcp.json`
+  (Claude Code), `.gemini/settings.json` (Gemini CLI), `opencode.json` (opencode) y
+  `tools/mcp/antigravity_mcp_config.json` (Antigravity); verificador `tools/mcp_check.py`.
 - Workflow de despliegue en `.github/workflows/deploy.yml`.
 - Historial Git (`.git`), con `origin` apuntando a `github.com/JuandediosF/judy-vr-solar`.
 
@@ -23,6 +26,9 @@ equipo con **Orca** pueda trabajar con las mismas reglas, skills y comandos.
 - Python 3.9 o superior (solo biblioteca estándar; sin `pip install`).
 - Opcional: PHP 8.1+ en PATH para que el auditor ejecute `php -l`.
 - Git (opcional; el ZIP ya trae el historial).
+- Para los MCP: Node.js 18+ con `npx`, Google Chrome (lo usa Playwright) y la variable
+  de entorno `GITHUB_PERSONAL_ACCESS_TOKEN` (en Windows: `setx GITHUB_PERSONAL_ACCESS_TOKEN (gh auth token)`).
+  Sin Docker, PHP ni Python extra. Detalles en `HERRAMIENTAS.md` → «Servidores MCP».
 
 ## Puesta en marcha
 
@@ -40,6 +46,7 @@ O manualmente:
 python tools/judy_gem_sync.py       # comprueba skills -> comandos -> Gems
 python tools/judy_audit.py --strict # auditoría previa
 python tools/build_portable_zip.py  # reconstruye el ZIP sin secretos
+python tools/mcp_check.py           # comprueba los servidores MCP (añade --smoke para probar en vivo)
 ```
 
 Resultado esperado: `Skills válidas: 5`, `Estado: SINCRONIZADO` y
@@ -51,6 +58,9 @@ Resultado esperado: `Skills válidas: 5`, `Estado: SINCRONIZADO` y
 - Si un agente no ve una skill, ejecuta `python tools/judy_gem_sync.py --write`.
 - Comandos Gemini CLI: `/judy:audit`, `/judy:monitor`, `/judy:seguridad`, `/judy:sql`, `/judy:sync`.
 - Para OpenCode u otros agentes: ejecuta directamente `python tools/<script>.py --json`.
+- MCP: Claude Code pide aprobar los servidores de `.mcp.json` la primera vez; Antigravity
+  necesita copiar `tools/mcp/antigravity_mcp_config.json` a `~/.gemini/antigravity/mcp_config.json`.
+  Para verificar producción en InfinityFree usa Playwright, no `curl` (`.agents/rules/mcp.md`).
 - Antes de cualquier push/FTP: `python tools/judy_audit.py --strict`.
 - Después de desplegar: `python tools/judy_monitor.py --url https://judysimulator.wuaze.com`.
 

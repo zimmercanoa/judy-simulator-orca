@@ -80,3 +80,10 @@ Este documento establece las directrices obligatorias de arquitectura, configura
 - Antes de cualquier cambio: `python tools/judy_audit.py --strict`. Después de cada despliegue: `python tools/judy_monitor.py --url <URL_PUBLICA>`.
 - Las Gems de la app Gemini se generan desde las skills con `python tools/judy_gem_sync.py --write`; se edita la skill, nunca el derivado.
 - Guía completa: `HERRAMIENTAS.md`. Ninguna herramienta imprime credenciales; usa `****`.
+
+---
+
+## 9. Servidores MCP compartidos
+- `playwright` (navegador real), `github` (solo lectura: repos, PRs, Actions, issues) y `context7` (documentación de Flutter/Dart/PHP) están configurados para todos los agentes; reglas de uso en `.agents/rules/mcp.md`.
+- Para comprobar producción en InfinityFree usa Playwright, no `curl` (el desafío anti-bots `aes.js` bloquea a `curl`).
+- Nunca escribas credenciales en páginas, capturas ni logs. El token de GitHub solo vive en la variable de entorno `GITHUB_PERSONAL_ACCESS_TOKEN`.
